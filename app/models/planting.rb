@@ -1,15 +1,16 @@
 class Planting < ActiveRecord::Base
   extend FriendlyId
   include PhotoCapable
+  include Finishable
   friendly_id :planting_slug, use: %i(slugged finders)
 
   # Constants
-  SUNNINESS_VALUES = %w(sun semi-shade shade)
+  SUNNINESS_VALUES = %w(sun semi-shade shade).freeze
   PLANTED_FROM_VALUES = [
     'seed', 'seedling', 'cutting', 'root division', 'runner',
     'bulb', 'root/tuber', 'bare root plant', 'advanced plant',
     'graft', 'layering'
-  ]
+  ].freeze
 
   ##
   ## Triggers
@@ -20,12 +21,17 @@ class Planting < ActiveRecord::Base
   belongs_to :crop, counter_cache: true
   has_many :harvests, dependent: :destroy
 
+  #
+  # Ancestry of food
+  belongs_to :parent_seed, class_name: 'Seed', foreign_key: 'parent_seed_id' # parent
+  has_many :child_seeds, class_name: 'Seed',
+                         foreign_key: 'parent_planting_id', dependent: :nullify # children
+
   ##
   ## Scopes
-  default_scope { joins(:owner).order(created_at: :desc) }
-  scope :finished, -> { where(finished: true) }
-  scope :current, -> { where(finished: false) }
+  default_scope { joins(:owner) } # Ensures the owner still exists
   scope :interesting, -> { has_photos.one_per_owner }
+  scope :recent, -> { order(created_at: :desc) }
   scope :one_per_owner, lambda {
     joins("JOIN members m ON (m.id=plantings.owner_id)
            LEFT OUTER JOIN plantings p2
@@ -72,7 +78,7 @@ class Planting < ActiveRecord::Base
   end
 
   def default_photo
-    photos.first
+    photos.order(created_at: :desc).first
   end
 
   def planted?

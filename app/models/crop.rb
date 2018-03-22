@@ -1,6 +1,6 @@
 class Crop < ActiveRecord::Base
   extend FriendlyId
-  friendly_id :name, use: [:slugged, :finders]
+  friendly_id :name, use: %i(slugged finders)
 
   ##
   ## Triggers
@@ -24,8 +24,7 @@ class Crop < ActiveRecord::Base
 
   ##
   ## Scopes
-  default_scope { order("lower(crops.name) asc") }
-  scope :recent, -> { approved.reorder("created_at desc") }
+  scope :recent, -> { approved.order(created_at: :desc) }
   scope :toplevel, -> { approved.where(parent_id: nil) }
   scope :popular, -> { approved.reorder("plantings_count desc, lower(name) asc") }
   # ok on sqlite and psql, but not on mysql
@@ -121,7 +120,8 @@ class Crop < ActiveRecord::Base
   # later we can choose a default photo based on different criteria,
   # eg. popularity
   def default_photo
-    return photos.first if photos.any?
+    # most recent photo
+    return photos.order(created_at: :desc).first if photos.any?
 
     # Crop has no photos? Look for the most recent harvest with a photo.
     harvest_with_photo = Harvest.where(crop_id: id).joins(:photos).order('harvests.id DESC').limit(1).first

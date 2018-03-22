@@ -12,6 +12,7 @@ describe "plantings/show" do
 
   before(:each) do
     assign(:planting, planting)
+    assign(:photos, planting.photos.paginate(page: 1))
     controller.stub(:current_user) { member }
   end
 
@@ -27,17 +28,17 @@ describe "plantings/show" do
 
   context 'planted from' do
     let(:planting) { FactoryBot.create(:cutting_planting) }
+
     it "shows planted_from" do
       render
       rendered.should have_content 'Planted from:'
       rendered.should have_content 'cutting'
     end
 
-    it "doesn't show planted_from if blank" do
+    it "shows planted_from if blank" do
       planting.update(planted_from:  '')
       render
-      rendered.should_not have_content 'Planted from:'
-      rendered.should_not have_content 'cutting'
+      rendered.should have_content 'Planted from: not specified'
     end
   end
 
