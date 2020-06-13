@@ -1,10 +1,12 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 describe "crops/edit" do
-  before(:each) do
-    controller.stub(:current_user) {
+  before do
+    controller.stub(:current_user) do
       FactoryBot.create(:crop_wrangling_member)
-    }
+    end
     @crop = FactoryBot.create(:maize)
     3.times do
       @crop.scientific_names.build
@@ -14,6 +16,6 @@ describe "crops/edit" do
   end
 
   it "shows the creator" do
-    rendered.should have_content "Added by #{@crop.creator} less than a minute ago."
+    expect(rendered).to have_content "Added by #{@crop.creator} less than a minute ago."
   end
 end

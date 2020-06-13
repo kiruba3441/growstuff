@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 describe Forum do
@@ -19,11 +21,5 @@ describe Forum do
     @post1 = FactoryBot.create(:forum_post, forum: forum)
     @post2 = FactoryBot.create(:forum_post, forum: forum)
     forum.posts.size.should == 2
-  end
-
-  it "orders posts in reverse chron order" do
-    @post1 = FactoryBot.create(:forum_post, forum: forum, created_at: 2.days.ago)
-    @post2 = FactoryBot.create(:forum_post, forum: forum, created_at: 1.day.ago)
-    forum.posts.first.should eq @post2
   end
 end

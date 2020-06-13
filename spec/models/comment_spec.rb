@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 describe Comment do
@@ -14,12 +16,10 @@ describe Comment do
   end
 
   context "notifications" do
-    let(:comment) { FactoryBot.create(:comment) }
-
     it "sends a notification when a comment is posted" do
-      expect {
+      expect do
         FactoryBot.create(:comment)
-      }.to change(Notification, :count).by(1)
+      end.to change(Notification, :count).by(1)
     end
 
     it "sets the notification fields" do
@@ -35,26 +35,22 @@ describe Comment do
     it "doesn't send notifications to yourself" do
       @m = FactoryBot.create(:member)
       @p = FactoryBot.create(:post, author: @m)
-      expect {
+      expect do
         FactoryBot.create(:comment, post: @p, author: @m)
-      }.to change(Notification, :count).by(0)
+      end.to change(Notification, :count).by(0)
     end
   end
 
   context "ordering" do
-    before(:each) do
+    before do
       @m = FactoryBot.create(:member)
       @p = FactoryBot.create(:post, author: @m)
       @c1 = FactoryBot.create(:comment, post: @p, author: @m)
       @c2 = FactoryBot.create(:comment, post: @p, author: @m)
     end
 
-    it 'is in DESC order by default' do
-      Comment.all.should eq [@c2, @c1]
-    end
-
     it 'has a scope for ASC order for displaying on post page' do
-      Comment.post_order.should eq [@c1, @c2]
+      described_class.post_order.should eq [@c1, @c2]
     end
   end
 end
