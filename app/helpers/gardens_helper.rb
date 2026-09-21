@@ -1,4 +1,16 @@
+# frozen_string_literal: true
+
 module GardensHelper
+  # Props for the GardenCards React island: a card per garden, plus the icon to
+  # use for crops that have none of their own.
+  def garden_cards_props(gardens, owner: nil)
+    {
+      gardens:          GardenCardSerializer.collection(gardens, ability: current_ability, show_owner: owner.blank?),
+      default_icon_url: image_path('icons/planting.svg'),
+      spade_icon_url:   image_path('spade-marker.svg')
+    }
+  end
+
   def display_garden_description(garden)
     if garden.description.nil?
       "no description provided."
@@ -9,14 +21,12 @@ module GardensHelper
     end
   end
 
-  def gardens_active_tickbox_path(owner, show_all)
-    show_inactive_tickbox_path('gardens', owner, show_all)
-  end
-
+  # TODO: Not used?
   def display_garden_name(garden)
     truncate(garden.name, length: 50, separator: ' ', omission: '... ')
   end
 
+  # TODO: Only used by specs?
   def display_garden_plantings(plantings)
     if plantings.blank?
       "None"
@@ -30,6 +40,7 @@ module GardensHelper
       end
       output += '</ul>'
       output.html_safe
+
     end
   end
 end
